@@ -72,16 +72,24 @@ public:
 	void cmd(Client cli, std::string::size_type nl_index);
 
 	// TODO: following fts
+
 	// void pass();
 	// void nick();
 	// void user();
-	// void oper();
-	// void mode();
 	// void join();
+
+
+	// void privmsg();
+	// void oper();
+	// void squit();
+	// void connect();
+	// void kill();
+
+	// 안해도 될 듯
+	// void mode();
 	// void part();
 	// void names();
 	// void kick();
-	// void privmsg();
 	// void quit();
 	
 };
