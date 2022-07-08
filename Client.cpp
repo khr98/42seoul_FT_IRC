@@ -7,9 +7,11 @@ using std::set;
 
 Client::Client() : _isAuth(false), _isReg(false), _nickname(""), _username(""), _msg(""), _idx(-1), _fd(-1), _mode(0) {}
 
-Client::Client(int idx, int fd) : _isAuth(false),
+Client::Client(int idx, int fd, std::string host) : _isAuth(false), 
  _isReg(false), _nickname(""), _username(""), _msg(""), _idx(idx), _fd(fd), _mode(0)
-  {}
+  {
+	  _host = host;
+  }
 
 Client::Client(const Client& cli)
 {
@@ -30,6 +32,7 @@ Client& Client::operator=(const Client& cli)
 	_idx = cli._idx;
 	_fd = cli._fd;
 	_mode = cli._mode;
+	_host = cli._host;
 	return *this;
 }
 
@@ -47,6 +50,20 @@ void Client::setAuth(string passwd, string serverPw)
 	{
 		_isReg = true;
 		sendMsg("reg\n");
+		sendMsg(":Welcome to the Internet Relay Network "+ _nickname + "!"+ _username + "@"+_host +"\n");
+
+	}
+}
+
+void Client::setUsername(vector<string> &args)
+{
+	_username = args[1];
+	
+	if (_isAuth && _nickname != "" && _username != "")
+	{
+		_isReg = true;
+		sendMsg("reg\n");
+		sendMsg(":Welcome to the Internet Relay Network "+ _nickname + "!"+ _username + "@"+_host +"\n");
 	}
 }
 
@@ -60,48 +77,39 @@ void Client::setNick(map<string, int>& client_map, string arg)
 	{
 		_isReg = true;
 		sendMsg("reg\n");
-	}
-}
+		sendMsg(":Welcome to the Internet Relay Network "+ _nickname + "!"+ _username + "@"+_host +"\n");
 
-void Client::setUsername(vector<string> args)
-{
-	_username = args[0];
-	if (_isAuth && _nickname != "" && _username != "")
-	{
-		_isReg = true;
-		sendMsg("reg\n");
 	}
 }
 
 
 // ft
 
-void Client::sendMsg(string msg, int flag = 0)
+void Client::sendMsg(std::string msg, int flag)
 {
-	std::cout << "to " << _idx << ':' << msg;
+	std::cout << "# msg to " << _nickname<< " (USER " << _idx << ") => " << msg;
 	send(_fd, msg.c_str(), msg.size(), flag);
 }
 
-void Client::setMsg(char *buf)
+void Client::setMsg(string buf)
 {
-	_msg[0] = '\0';
+	_msg.clear();
 	_msg += buf;
 }
 
-void Client::joinChannel(Channel channel)
+void Client::joinChannel(std::string channel_name)
 {
-	_joinedChannel.insert(channel.name());
-	channel.memberJoin(_idx);
+	_joinedChannel.insert(channel_name);
 }
 
-void Client::leaveChannel(std::map<std::string, Channel> channels, Channel channel)
+void Client::leaveChannel(std::map<std::string, Channel> & channels, Channel & channel)
 {
 	_joinedChannel.erase(channel.name());
 	channel.memberLeave(channels, _idx);
 
 }
 
-void Client::leaveAllChannel(std::map<std::string, Channel> channels)
+void Client::leaveAllChannel(std::map<std::string, Channel> & channels)
 {
 	while (!_joinedChannel.empty())
 	{
@@ -144,6 +152,10 @@ string Client::nickname(void)
 {
 	return _nickname;
 }
+string Client::username(void)
+{
+	return _username;
+}
 
 int  Client::idx(void)
 {
@@ -158,4 +170,9 @@ int  Client::fd(void)
 int Client::mode(void)
 {
 	return _mode;
+}
+
+std::string Client::host(void){
+
+		return _host;
 }

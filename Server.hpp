@@ -8,6 +8,8 @@
 # include <queue>
 # include <cstring>
 # include <cstdlib>
+# include <string>
+# include <algorithm>
 
 # include <sys/types.h>
 # include <sys/socket.h>
@@ -27,7 +29,19 @@
 
 class Server
 {
+public:
+	typedef std::string::size_type s_size;
+
 private:
+
+	// server info
+	std::string _host;
+	std::string _servername;
+	std::string _date;
+	std::string _version;
+	std::string _available_user_modes;
+	std::string _available_channel_modes;
+
 	// server setting
 	const int port;
 	const std::string passwd;
@@ -37,9 +51,9 @@ private:
 	const std::string oper_pw;
     
 	// client info
-	std::map<std::string, int> client_map;
+	std::map<std::string, int> client_names;
 	std::map<std::string, Channel> channels;
-	std::vector<Client> clients;
+	std::map<int, Client> clients;
 
 	// poll management
 	struct pollfd poll_fds[CLIENT_MAX];
@@ -69,15 +83,17 @@ public:
 	bool processClientPoll(int poll_ret);
 
 	// process cmd
-	void cmd(Client cli, std::string::size_type nl_index);
+	void cmd(Client &  cli);
+	void serverResponse(Client &  cli, std::vector<std::string> & arg);
 
 	// TODO: following fts
 
-	// void pass();
-	// void nick();
-	// void user();
-	// void join();
+	void pass(Client &  cli, std::vector<std::string> & arg);
+	void nick(Client &  cli, std::vector<std::string> & arg);
+	void user(Client &  cli, std::vector<std::string> & arg);
+	void join(Client &  cli, std::vector<std::string> & arg);
 
+	// void mode();
 
 	// void privmsg();
 	// void oper();
@@ -86,12 +102,33 @@ public:
 	// void kill();
 
 	// 안해도 될 듯
-	// void mode();
 	// void part();
 	// void names();
 	// void kick();
 	// void quit();
+
+
+	std::string serverReponse(Client& cli, int code);
+
+	class IRC_ERR : public std::exception
+	 {
+	// private: 
+	// 	int code;
+	public:
+		//IRC_ERR(int code): code(code){};
+		virtual const char* what() const throw();
+	};
+
+	class ERR_IRC: public std::exception
+	{
+	private:
+		int _code;
+	public:
+		ERR_IRC(int code): _code(code){};
+		virtual const char* what() const throw();
+	};
 	
+
 };
 
 #endif

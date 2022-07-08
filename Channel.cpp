@@ -28,16 +28,25 @@ bool Channel::isMember(int i)
 	return _member.find(i) != _member.end();
 }
 
-void Channel::sendChannelMsg(std::vector<Client> clients, int i, string msg, int self)
+void Channel::sendChannelMsg(std::map<int, Client> & clients, string msg)
 {
-	for (set<int>::iterator itr = _member.begin(); itr != _member.end(); ++itr)
-		if (self || i != *itr)
+
+	set<int>::iterator itr = _member.begin();
+
+	for (; itr != _member.end(); itr++){
 			clients[*itr].sendMsg(msg);
+		}
 }
 
-void Channel::memberJoin(int client_idx)
+void Channel::memberJoin(Client &cli)
 {
-	_member.insert(client_idx);
+	// std::set<int>::iterator itr = _member.begin();
+	// for(;itr!= _member.end(); itr++)
+
+	_member.insert(cli.idx());
+	cli.joinChannel(_name);
+
+
 }
 
 void Channel::memberLeave(std::map<string, Channel>& channel, int client_idx)

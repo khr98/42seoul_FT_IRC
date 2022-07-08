@@ -23,8 +23,8 @@ public:
 	~Channel();
 
 	bool isMember(int i);
-	void sendChannelMsg(std::vector<Client> clients, int i, std::string msg, int self=1);
-	void memberJoin(int client_idx);
+	void sendChannelMsg(std::map<int, Client> & clients, std::string msg);
+	void memberJoin(Client& cli);
 	void memberLeave(std::map<std::string, Channel>& channel, int client_idx);
 
 	std::set<int>& member(void);

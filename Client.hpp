@@ -26,11 +26,12 @@ private:
 	int _idx;
 	int _fd;
 	int _mode;
+	std::string _host;
 	
 
 public:
 	Client();
-	Client(int idx, int fd);
+	Client(int idx, int fd, std::string host);
 	Client(const Client& a);
 	~Client();
 	Client& operator=(const Client& a);
@@ -38,8 +39,8 @@ public:
 	// set
 	void setAuth(std::string passwd, std::string serverPw);
 	void setNick(std::map<std::string, int>& client_map, std::string nic);
-	void setUsername(std::vector<std::string> args);
-	void setMsg(char *buf);
+	void setUsername(std::vector<std::string> &args);
+	void setMsg(std::string buf);
 
 	// get
 	bool isReg(void);
@@ -47,15 +48,17 @@ public:
 	std::string msg(void);
 	std::set<std::string>& joinedChannel(void);
 	std::string nickname(void);
+	std::string username(void);
 	int idx(void);
 	int fd(void);
 	int mode(void);
+	std::string host(void);
 
 	// ft
 	void sendMsg(std::string msg, int flag=0);
-	void joinChannel(Channel channel);
-	void leaveChannel(std::map<std::string, Channel> channels, Channel channel);
-	void leaveAllChannel(std::map<std::string, Channel> channels);
+	void joinChannel(std::string channel_name);
+	void leaveChannel(std::map<std::string, Channel> & channels, Channel & channel);
+	void leaveAllChannel(std::map<std::string, Channel> & channels);
 	void closeFd();
 
 };
