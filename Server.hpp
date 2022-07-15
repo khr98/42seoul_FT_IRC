@@ -92,11 +92,11 @@ public:
 	void nick(Client &  cli, std::vector<std::string> & arg);
 	void user(Client &  cli, std::vector<std::string> & arg);
 	void join(Client &  cli, std::vector<std::string> & arg);
-
-	// void mode();
-
+	void oper(Client &  cli, std::vector<std::string> & arg);
+	void privmsg(Client &  cli, std::vector<std::string> & arg);
+	
+	// void quit();	
 	// void privmsg();
-	// void oper();
 	// void squit();
 	// void connect();
 	// void kill();
@@ -105,8 +105,9 @@ public:
 	// void part();
 	// void names();
 	// void kick();
-	// void quit();
+	
 
+	bool isChannel(Client & cli,char c, std::string pool);
 
 	std::string serverReponse(Client& cli, int code);
 
