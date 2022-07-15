@@ -75,6 +75,11 @@ void Client::setNick(std::map<std::string, int> &client_map, std::string arg)
 	}
 }
 
+void Client::setOper()
+{
+	_mode = MODE_o;
+}
+
 // ft
 
 void Client::sendMsg(std::string msg, int flag)
@@ -135,6 +140,13 @@ std::string Client::msg(void)
 {
 	return _msg;
 }
+
+
+bool Client::isOper(void)
+{
+	return _mode;
+}
+
 
 std::set<std::string> &Client::joinedChannel(void)
 {

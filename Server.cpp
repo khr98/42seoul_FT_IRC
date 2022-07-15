@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string pw) : port(port), passwd(pw), oper_name("Anon"), oper_pw("1234"), clientaddr_len(sizeof(client_addr)) {}
+Server::Server(int port, std::string pw) : port(port), passwd(pw), oper_name("Admin"), oper_pw("Admin1234"), clientaddr_len(sizeof(client_addr)) {}
 
 Server::~Server()
 {
@@ -218,6 +218,10 @@ void Server::processCmds(Client &cli, std::vector<std::string> cmds)
 				user(cli, tokens);
 			else if (tokens[0] == "JOIN")
 				join(cli, tokens);
+			else if(tokens[0] == "OPER")
+				oper(cli, tokens);
+			else if(tokens[0] == "PRIVMSG")
+				privmsg(cli, tokens);
 		}
 		catch (const std::exception &e)
 		{
@@ -285,8 +289,52 @@ void Server::join(Client &cli, std::vector<std::string> &arg)
 	}
 }
 
+void Server::privmsg(Client & cli, std::vector<std::string> & arg){
+	//채널메세지일경우
+	//있는 채널일경우
+	//없는 채널일경우
+	if (arg.size() < 2)
+		throw ERR_IRC(461);
+	std::vector<std::string>::iterator itr = ++(arg.begin());
+	std::string message = arg.back();
+	cli.sendMsg(message);
+	for (; itr != --arg.end(); itr++)
+	{
+		if (isChannel(cli,itr->at(0), CHANNEL_PREFIX))
+		{
+			cli.sendMsg("this is channel");
+			if (channels.find(*itr) == channels.end())
+				throw ERR_IRC(404);
+			channels[*itr].sendChannelMsg(clients, ":" + cli.nickname()+" PRIVMSG "+ *itr + " " + message + "\n");
+		}
+		else
+		{
+			//nick 메세지 일경우
+			//있는 유저일경우
+			//없는 유저일경우
+			cli.sendMsg("is not channel");
+			// if (client_map.find(*itr) == client_map.end())
+			// 	throw ERR_NOSUCHNICK();
+			// client[client_map[*itr]].sendMsg(client[i].prefix() + client[i].message() + '\n');
+		}
+	}
+}
+
+void Server::oper(Client & cli, std::vector<std::string> & arg){
+	if (arg.size() != 3)
+		throw ERR_IRC(461); ////ERR_NEEDMOREPARAMS
+	if (oper_name != arg[1])
+		throw ERR_IRC(491);//ERR_NOOPERHOST
+	if (oper_pw != arg[2])
+		throw ERR_IRC(464);//ERR_PASSWDMISMATCH
+	cli.setOper();
+	if (cli.isOper())
+		cli.sendMsg(":You are now an IRC operator\n");
+}
+
 std::string Server::serverReponse(Client &cli, int code)
 {
+
 	std::ostringstream ss;
 	ss << ":" << _host << " " << code << " ";
 
@@ -314,56 +362,72 @@ const char *Server::ERR_IRC::what() const throw()
 {
 	switch (_code)
 	{
-	case 403: // ERR_NOSUCHCHANNEL
-		// arg : channel
-		return " :No such channel";
-	case 405: //  ERR_TOOMANYCHANNELS
-		// arg : channel
-		return " :You have joined too many channels";
-	case 407: //  ERR_TOOMANYTARGETS
-		// arg : target
-		return " :407 recipients.";
+		case 403: //ERR_NOSUCHCHANNEL
+			//arg : channel 
+			return " :No such channel";
+		
+		case 404:
+			return " :Cannot send to channel";
+		
+		case 405://  ERR_TOOMANYCHANNELS
+			//arg : channel 
+			return " :You have joined too many channels";
+		case 407://  ERR_TOOMANYTARGETS
+			//arg : target 
+			return " :407 recipients.";
+			
+		case 431: //  ERR_NONICKNAMEGIVEN 
+			return ":No nickname given";
+		case 432://  ERR_ERRONEUSNICKNAME  
+			//arg : nick 
+			return " :Erroneous nickname";
+		case 433://  ERR_NICKNAMEINUSE 
+			//arg : nick 
+			return " :Nickname is already in use";
+		case 436://  ERR_NICKCOLLISION
+			//arg : nick ,user@host
+			return " :Nickname collision KILL from ";
+		case 437://  ERR_UNAVAILRESOURCE 
+			//arg : nick/channel
+			return " :Nick/channel is temporarily unavailable";
 
-	case 431: //  ERR_NONICKNAMEGIVEN
-		return ":No nickname given";
-	case 432: //  ERR_ERRONEUSNICKNAME
-		// arg : nick
-		return " :Erroneous nickname";
-	case 433: //  ERR_NICKNAMEINUSE
-		// arg : nick
-		return " :Nickname is already in use";
-	case 436: //  ERR_NICKCOLLISION
-		// arg : nick ,user@host
-		return " :Nickname collision KILL from ";
-	case 437: //  ERR_UNAVAILRESOURCE
-		// arg : nick/channel
-		return " :Nick/channel is temporarily unavailable";
+		case 464: // ERR_PASSWDMISMATCH
+			return " :Wrong host password";
 
-	case 461: //  ERR_NEEDMOREPARAMS
-		// arg : CMD
-		return " :Not enough parameters";
-	case 462: //  ERR_ALREADYREGISTRED
-		return ":Unauthorized command (already registered)";
+		case 461://  ERR_NEEDMOREPARAMS
+			//arg : CMD
+			return " :Not enough parameters";
+		case 462://  ERR_ALREADYREGISTRED
+			return ":Unauthorized command (already registered)";
 
-	case 471: // 471 ERR_CHANNELISFULL
-		// arg : channel
-		return " :Cannot join channel (+l)";
-	case 473: // 473 ERR_INVITEONLYCHAN
-		// arg : channel
-		return " :Cannot join channel (+i)";
-	case 474: // 474 ERR_BANNEDFROMCHAN
-		// arg : channel
-		return " :Cannot join channel (+b)";
-	case 475: // 475 ERR_BADCHANNELKEY
-		// arg : channel
-		return " :Cannot join channel (+k)";
-	case 476: // 476 ERR_BADCHANMASK
-		// arg : channel
-		return " :Bad Channel Mask";
-	case 484: // 484 ERR_RESTRICTED
-		return " :Your connection is restricted!";
+		case 471: // 471 ERR_CHANNELISFULL
+			//arg : channel
+			return " :Cannot join channel (+l)";
+		case 473:// 473 ERR_INVITEONLYCHAN
+			//arg : channel
+			return " :Cannot join channel (+i)";
+		case 474: // 474 ERR_BANNEDFROMCHAN
+			//arg : channel
+			return " :Cannot join channel (+b)";
+		case 475: // 475 ERR_BADCHANNELKEY
+			//arg : channel
+			return " :Cannot join channel (+k)";
+		case 476: // 476 ERR_BADCHANMASK
+			//arg : channel
+			return " :Bad Channel Mask";
+		case 484: // 484 ERR_RESTRICTED
+			return " :Your connection is restricted!";
 
-	default:
-		return "error\n";
+		case 491: //491 ERR_NOOPERHOST
+			return " :Wrong Host name!";
+		default:
+			return "error\n";
 	}
+}
+
+bool Server::isChannel(Client & cli,char c, std::string pool)
+{
+	std::string s(1, c);
+	cli.sendMsg(s);
+	return (pool.find(c) != std::string::npos);
 }

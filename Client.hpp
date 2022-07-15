@@ -40,10 +40,12 @@ public:
 	void setNick(std::map<std::string, int> &client_map, std::string nic);
 	void setUsername(std::vector<std::string> &args);
 	void setMsg(std::string buf);
+	void setOper();
 
 	// get
 	bool isReg(void);
 	bool isAuth(void);
+	bool isOper(void);
 	std::string msg(void);
 	std::set<std::string> &joinedChannel(void);
 	std::string nickname(void);

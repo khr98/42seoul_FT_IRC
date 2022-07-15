@@ -92,15 +92,15 @@ public:
 
 	// TODO: following fts
 
-	void pass(Client &cli, std::vector<std::string> &arg);
-	void nick(Client &cli, std::vector<std::string> &arg);
-	void user(Client &cli, std::vector<std::string> &arg);
-	void join(Client &cli, std::vector<std::string> &arg);
-
-	// void mode();
-
+	void pass(Client &  cli, std::vector<std::string> & arg);
+	void nick(Client &  cli, std::vector<std::string> & arg);
+	void user(Client &  cli, std::vector<std::string> & arg);
+	void join(Client &  cli, std::vector<std::string> & arg);
+	void oper(Client &  cli, std::vector<std::string> & arg);
+	void privmsg(Client &  cli, std::vector<std::string> & arg);
+	
+	// void quit();	
 	// void privmsg();
-	// void oper();
 	// void squit();
 	// void connect();
 	// void kill();
@@ -109,9 +109,11 @@ public:
 	// void part();
 	// void names();
 	// void kick();
-	// void quit();
+	
 
-	std::string serverReponse(Client &cli, int code);
+	bool isChannel(Client & cli,char c, std::string pool);
+
+	std::string serverReponse(Client& cli, int code);
 
 	class IRC_ERR : public std::exception
 	{
