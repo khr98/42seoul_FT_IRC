@@ -1,15 +1,11 @@
 #include "Server.hpp"
 
-using std::cout;
-using std::cin;
-using std::endl;
-
 int main(int argc, char **argv)
 {
 	// check args
 	if (argc < 3 || argc > 4)
 	{
-		std::cerr << "check args: ./ircserv <port> <password>" << endl;
+		std::cerr << "check args: ./ircserv <port> <password>" << std::endl;
 		return 1;
 	}
 
@@ -17,7 +13,7 @@ int main(int argc, char **argv)
 	for (int i = 0; argv[1][i]; ++i)
 		if (!isdigit(argv[1][i]))
 		{
-			cout << "wrong port number" << endl;
+			std::cout << "wrong port number" << std::endl;
 			return 1;
 		}
 
