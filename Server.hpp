@@ -111,7 +111,7 @@ public:
 	// void kick();
 	
 
-	bool isChannel(Client & cli,char c, std::string pool);
+	bool isChannel(char c, std::string pool);
 
 	std::string serverReponse(Client& cli, int code);
 

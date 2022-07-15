@@ -290,32 +290,23 @@ void Server::join(Client &cli, std::vector<std::string> &arg)
 }
 
 void Server::privmsg(Client & cli, std::vector<std::string> & arg){
-	//채널메세지일경우
-	//있는 채널일경우
-	//없는 채널일경우
 	if (arg.size() < 2)
 		throw ERR_IRC(461);
 	std::vector<std::string>::iterator itr = ++(arg.begin());
 	std::string message = arg.back();
-	cli.sendMsg(message);
 	for (; itr != --arg.end(); itr++)
 	{
-		if (isChannel(cli,itr->at(0), CHANNEL_PREFIX))
+		if (isChannel(itr->at(0), CHANNEL_PREFIX))
 		{
-			cli.sendMsg("this is channel");
 			if (channels.find(*itr) == channels.end())
 				throw ERR_IRC(404);
 			channels[*itr].sendChannelMsg(clients, ":" + cli.nickname()+" PRIVMSG "+ *itr + " " + message + "\n");
 		}
 		else
 		{
-			//nick 메세지 일경우
-			//있는 유저일경우
-			//없는 유저일경우
-			cli.sendMsg("is not channel");
-			// if (client_map.find(*itr) == client_map.end())
-			// 	throw ERR_NOSUCHNICK();
-			// client[client_map[*itr]].sendMsg(client[i].prefix() + client[i].message() + '\n');
+			if (client_names.find(*itr) == client_names.end()) // ERR_NICKNAMEINUSE
+				throw ERR_IRC(401);
+			clients[client_names[*itr]].sendMsg(":" + cli.nickname()+" PRIVMSG "+ *itr + " " + message + "\n");
 		}
 	}
 }
@@ -362,6 +353,8 @@ const char *Server::ERR_IRC::what() const throw()
 {
 	switch (_code)
 	{
+		case 401: //ERR_NOSUCHNICK
+			return " :No such nick";
 		case 403: //ERR_NOSUCHCHANNEL
 			//arg : channel 
 			return " :No such channel";
@@ -425,9 +418,8 @@ const char *Server::ERR_IRC::what() const throw()
 	}
 }
 
-bool Server::isChannel(Client & cli,char c, std::string pool)
+bool Server::isChannel(char c, std::string pool)
 {
-	std::string s(1, c);
-	cli.sendMsg(s);
 	return (pool.find(c) != std::string::npos);
 }
+
