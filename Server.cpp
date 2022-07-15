@@ -296,6 +296,8 @@ void Server::privmsg(Client & cli, std::vector<std::string> & arg){
 	if (arg.size() < 2)
 		throw ERR_IRC(461);
 	std::vector<std::string>::iterator itr = ++(arg.begin());
+	std::string message = arg.back();
+	cli.sendMsg(message);
 	for (; itr != --arg.end(); itr++)
 	{
 		if (isChannel(cli,itr->at(0), CHANNEL_PREFIX))
@@ -303,7 +305,7 @@ void Server::privmsg(Client & cli, std::vector<std::string> & arg){
 			cli.sendMsg("this is channel");
 			if (channels.find(*itr) == channels.end())
 				throw ERR_IRC(404);
-			channels[*itr].sendChannelMsg(clients, ":" + cli.nickname()+"!"+cli.username()+"@"+cli.host() + "PRIVMSG" + *itr + "\n");
+			channels[*itr].sendChannelMsg(clients, ":" + cli.nickname()+" PRIVMSG "+ *itr + " " + message + "\n");
 		}
 		else
 		{
