@@ -1,12 +1,12 @@
 #ifndef CHANNEL_HPP
-# define CHANNEL_HPP
+#define CHANNEL_HPP
 
-# include <string>
-# include <set>
-# include <map>
+#include <string>
+#include <set>
+#include <map>
 
 class Channel;
-# include "Client.hpp"
+#include "Client.hpp"
 
 class Channel
 {
@@ -17,17 +17,18 @@ private:
 
 public:
 	Channel();
-	Channel(const Channel& c);
+	Channel(const Channel &c);
 	Channel(std::string name);
-	Channel& operator=(const Channel& c);
+	Channel &operator=(const Channel &c);
 	~Channel();
 
 	bool isMember(int i);
-	void sendChannelMsg(std::map<int, Client> & clients, std::string msg);
-	void memberJoin(Client& cli);
-	void memberLeave(std::map<std::string, Channel>& channel, int client_idx);
+	void sendChannelMsg(std::map<int, Client> &clients, std::string msg);
+	void memberJoin(Client &cli);
+	void memberLeave(std::map<std::string, Channel> &channel, int client_idx);
 
-	std::set<int>& member(void);
+	std::set<int> &member(void);
+	int memberCnt(void);
 	std::string name();
 };
 
