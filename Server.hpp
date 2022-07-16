@@ -98,9 +98,8 @@ public:
 	void join(Client &  cli, std::vector<std::string> & arg);
 	void oper(Client &  cli, std::vector<std::string> & arg);
 	void privmsg(Client &  cli, std::vector<std::string> & arg);
-	
-	// void quit();	
-	// void privmsg();
+	void quit(Client & cli,std::vector<std::string> & arg);
+
 	// void squit();
 	// void connect();
 	// void kill();

@@ -222,6 +222,8 @@ void Server::processCmds(Client &cli, std::vector<std::string> cmds)
 				oper(cli, tokens);
 			else if(tokens[0] == "PRIVMSG")
 				privmsg(cli, tokens);
+			else if (tokens[0] == "QUIT")
+				quit(cli, tokens);
 		}
 		catch (const std::exception &e)
 		{
@@ -321,6 +323,39 @@ void Server::oper(Client & cli, std::vector<std::string> & arg){
 	cli.setOper();
 	if (cli.isOper())
 		cli.sendMsg(":You are now an IRC operator\n");
+}
+
+// void Server::quit(int i){
+// 	for (std::set<std::string>::iterator itr = clients[i].joinedChannel().begin(); itr != clients[i].joinedChannel().end(); ++itr)
+// 	{
+// 		std::vector<std::string> tmp = std::vector<std::string>(1, *itr);
+// 		tmp.push_back(".");
+// 		//privmsg(cli,i, tmp);
+// 	}
+// 	while (!clients[i].joinedChannel().empty())
+// 		channels[*clients[i].joinedChannel().begin()].memberLeave(channels,i);
+// 	std::cout << "good bye " << clients[i].nickname() << std::endl;
+// 	close(clients[i].fd());
+// 	client_names.erase(clients[i].nickname());
+// 	poll_fds[i].events = 0;
+// 	poll_fds[i].fd = -1;
+// 	ret_idxs.push(i);
+
+// }
+
+void Server::quit(Client & cli, std::vector<std::string> & arg){
+	if (arg.size() != 2)
+		throw ERR_IRC(461);
+	int idx = cli.idx();
+	cli.leaveServer(channels);
+	// RESET POLLFD
+	poll_fds[idx].events = 0;
+	poll_fds[idx].fd = -1;
+	ret_idxs.push(idx);
+	// REMOVE NICKNAME FROM OCCUPIED NICKNAME LIST
+	client_names.erase(cli.nickname());
+
+
 }
 
 std::string Server::serverReponse(Client &cli, int code)
